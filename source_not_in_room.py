@@ -13,7 +13,7 @@ from stl import mesh
 import pyroomacoustics as pra
 
 #%% Load STL mesh file
-path_to_stl_file = "data/smaller_slicedup_OC_evenmore_blenderfixed.stl"
+path_to_stl_file = "data/smaller_slicedup_OC_evenmore_blenderfixed_flippinginprogress.stl"
 
 material = pra.Material(energy_absorption=0.4, scattering=0.5)
 the_mesh = mesh.Mesh.from_file(path_to_stl_file)
