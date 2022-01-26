@@ -9,30 +9,29 @@ Code to reproduce the Source not in room issue in Pyroomacoustics
 # Package imports
 import numpy as np 
 import pandas as pd
-import pyvista as pv
 from stl import mesh
 import pyroomacoustics as pra
 
 # #%% Load STL mesh file
-path_to_stl_file = "data/OC_wellsliced.stl"
+path_to_stl_file = 'data/sliced_small_OC_cleaned.stl' #"data/OC_wellsliced.ply"
 
-# material = pra.Material(energy_absorption=0.4, scattering=0.5)
-# the_mesh = mesh.Mesh.from_file(path_to_stl_file)
-# ntriang, nvec, npts = the_mesh.vectors.shape
+material = pra.Material(energy_absorption=0.4, scattering=0.5)
+the_mesh = mesh.Mesh.from_file(path_to_stl_file)
+ntriang, nvec, npts = the_mesh.vectors.shape
 
 
 
-# #%% Make the 'room' from the mesh - each triangle in the mesh is a 'wall'. 
+#%% Make the 'room' from the mesh - each triangle in the mesh is a 'wall'. 
 
-# walls = []
-# for w in range(ntriang):
-#     walls.append(
-#         pra.wall_factory(
-#             the_mesh.vectors[w].T,
-#             material.energy_absorption["coeffs"],
-#             material.scattering["coeffs"],
-#         )
-#     )
+walls = []
+for w in range(ntriang):
+    walls.append(
+        pra.wall_factory(
+            the_mesh.vectors[w].T,
+            material.energy_absorption["coeffs"],
+            material.scattering["coeffs"],
+        )
+    )
 #%% Make the 'room'
 fs = 192000 # Hz
 # Load the call emission points 
@@ -41,9 +40,9 @@ bat1 = bat12_xyz[bat12_xyz['bat_number']==1]
 bat2 = bat12_xyz[bat12_xyz['bat_number']==2].reset_index()
 
 # #%% Make the 'room'
-# print('Generating Room...')
-# room = pra.Room(walls, fs=fs, max_order=1)
-# room.rt_args['receiver_radius']=0.1
+print('Generating Room...')
+room = pra.Room(walls, fs=fs, max_order=1)
+room.rt_args['receiver_radius']=0.1
 
 
 #%% Each point in space that the bats fly are microphones
@@ -65,50 +64,64 @@ bat2_call_emission_points = bat2.loc[bat2_t_emissions,['x','y','z']].to_numpy()
 
 #%%
 # Add sources and microphone array to room
-# room.add_microphone_array(mic_array)
+room.add_microphone_array(mic_array)
 
-# for i,each_emission in enumerate(bat2_call_emission_points):
-#     print(i)
-#     room.add_source(each_emission.tolist())
+for i,each_emission in enumerate(bat2_call_emission_points):
+    print(i)
+    room.add_source(each_emission.tolist())
 
-# #%% Run sound propagation
-# print('running sound propagation...')
-# room.image_source_model()
-# room.ray_tracing()
-# room.compute_rir()
-# print('done with sound prop...')
+#%% Run sound propagation
+print('running sound propagation...')
+room.image_source_model()
+room.ray_tracing()
+room.compute_rir()
+print('done with sound prop...')
 
 #%% 
-
-cave = pv.read(path_to_stl_file)
-bat_location = [-1.58650756,  3.08338761, -0.32707801]
-random_point = [-15.99597733,  13.16922419, -10.10347989]
-
-
-scene = pv.Plotter()
-
-scene.camera.position = (7.35, -4.6, -0.65)
-scene.camera.azimuth = -10
-scene.camera.roll = -100
-scene.camera.elevation = 0.5 #-15
-
-scene.camera.view_angle = 30
-scene.camera.focal_point = (0.6,-1.07,-0.24)
+# PyVista portion of the code to visualise the lines drawn between the test point 
+# and source
+# cave = pv.read(path_to_stl_file)
+# bat_location = [-1.58650756,  3.08338761, -0.32707801]
+# random_point = [-15.99597733,  13.16922419, -10.10347989]
 
 
-scene.add_mesh(cave)
+# scene = pv.Plotter()
 
-bat_ball = pv.Sphere(radius=0.1, center=bat_location)
-random_ball = pv.Sphere(radius=0.5, center=random_point)
-connector = pv.Line(bat_location, random_point)
+# scene.camera.position = (7.35, -4.6, -0.65)
+# scene.camera.azimuth = -10
+# scene.camera.roll = -100
+# scene.camera.elevation = 0.5 #-15
 
-scene.add_mesh(bat_ball)
-scene.add_mesh(random_ball, color='red')
-scene.add_mesh(connector,color='green')
+# scene.camera.view_angle = 30
+# scene.camera.focal_point = (0.6,-1.07,-0.24)
 
-scene.show()
 
-#cave.plot_normals()
-cave.find_closest_point(bat_location)
+# scene.add_mesh(cave)
 
-cave.plot_normals()
+# bat_ball = pv.Sphere(radius=0.1, center=bat_location)
+# random_ball = pv.Sphere(radius=0.5, center=random_point)
+# connector = pv.Line(bat_location, random_point)
+
+# scene.add_mesh(bat_ball)
+# scene.add_mesh(random_ball, color='red')
+# scene.add_mesh(connector,color='green')
+
+# scene.show()
+
+# #cave.plot_normals()
+# cave.find_closest_point(bat_location)
+
+# cave.plot_normals()
+
+# # cave.save('ply-to-stl.stl')
+
+# # scene.close()
+
+# # cave_reloaded = pv.read('data/ply-to-stl.stl')
+
+# cave_reloaded().plot_normals()
+
+
+
+
+
